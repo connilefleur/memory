@@ -3,18 +3,24 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-<meta name="theme-color" content="#1e1b2e" />
+<meta name="theme-color" content="#d4f0ec" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <meta name="mobile-web-app-capable" content="yes" />
 <title>Memory</title>
 <style>
   :root {
     --gap: clamp(6px, 1.8vmin, 14px);
-    --radius: clamp(10px, 2.4vmin, 18px);
-    --bg1: #2a2440;
-    --bg2: #1a1628;
-    --accent: #ff5d8f;
-    --accent2: #ffa6c1;
+    --radius: clamp(12px, 2.6vmin, 20px);
+    /* Soft teal & pastel palette */
+    --bg1: #e3f6f2;   /* pale mint */
+    --bg2: #b9e4de;   /* soft teal */
+    --ink: #2c5d57;   /* deep teal text */
+    --ink-soft: #5a8a84;
+    --teal: #5cc0b2;
+    --teal-light: #8fd6cb;
+    --teal-deep: #3a958a;
+    --card: #fbfffe;  /* card front background */
+    --pastel: #f7b7c2; /* soft pink accent for the reward heart */
   }
 
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -28,8 +34,8 @@
 
   body {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    background: radial-gradient(circle at 50% 0%, var(--bg1), var(--bg2));
-    color: #fff;
+    background: linear-gradient(160deg, var(--bg1), var(--bg2));
+    color: var(--ink);
     /* Fill the screen incl. mobile safe areas */
     height: 100dvh;
     display: flex;
@@ -46,26 +52,33 @@
 
   header {
     text-align: center;
-    margin-bottom: clamp(8px, 2vh, 20px);
+    margin-bottom: clamp(10px, 2.4vh, 24px);
   }
   header h1 {
     margin: 0;
-    font-size: clamp(1.3rem, 5vw, 2rem);
+    font-size: clamp(1.4rem, 5.2vw, 2.1rem);
     font-weight: 700;
-    letter-spacing: 0.5px;
+    letter-spacing: 1px;
+    color: var(--ink);
   }
   header p {
-    margin: 4px 0 0;
-    font-size: clamp(0.75rem, 3vw, 1rem);
-    opacity: 0.7;
+    margin: 5px 0 0;
+    font-size: clamp(0.78rem, 3vw, 1rem);
+    color: var(--ink-soft);
+    font-weight: 500;
   }
   header .moves {
-    margin-top: 6px;
-    font-size: clamp(0.7rem, 2.6vw, 0.9rem);
-    opacity: 0.55;
+    margin-top: 12px;
+    display: inline-block;
+    font-size: clamp(0.7rem, 2.6vw, 0.85rem);
+    color: var(--teal-deep);
+    background: rgba(255, 255, 255, 0.5);
+    padding: 5px 14px;
+    border-radius: 999px;
     letter-spacing: 0.5px;
+    font-weight: 500;
   }
-  header .moves b { opacity: 0.9; }
+  header .moves b { font-weight: 700; }
 
   /* The board is a square that fits within the smaller screen dimension */
   .board {
@@ -114,34 +127,39 @@
   }
 
   .face.back {
-    background: linear-gradient(145deg, var(--accent), #c23b6b);
-    box-shadow: inset 0 0 0 2px rgba(255,255,255,0.18),
-                0 4px 12px rgba(0,0,0,0.35);
+    background: linear-gradient(145deg, var(--teal-light), var(--teal));
+    box-shadow: inset 0 0 0 2px rgba(255,255,255,0.35),
+                0 6px 14px rgba(58,149,138,0.25);
   }
+  /* Clean minimal motif instead of a heart: a soft ring */
   .face.back::after {
-    content: "♥";
-    font-size: clamp(1.6rem, 8vmin, 3.2rem);
-    color: rgba(255,255,255,0.85);
-    text-shadow: 0 2px 6px rgba(0,0,0,0.3);
+    content: "";
+    width: 26%;
+    height: 26%;
+    border-radius: 50%;
+    border: 3px solid rgba(255,255,255,0.55);
   }
 
   .face.front {
     transform: rotateY(180deg);
-    background: #fff;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.35);
+    background: var(--card);
+    padding: clamp(5px, 1.6vmin, 11px);
+    box-shadow: 0 6px 14px rgba(58,149,138,0.22);
   }
+  /* contain so portrait images (Elli/Conrad) fit fully instead of cropping */
   .face.front img {
     width: 100%;
     height: 100%;
-    object-fit: cover;
+    object-fit: contain;
     display: block;
+    border-radius: calc(var(--radius) - 8px);
   }
 
   .tile.matched {
     animation: pop 0.4s ease;
   }
   .tile.matched .face.front {
-    box-shadow: 0 0 0 3px var(--accent2), 0 4px 16px rgba(255,93,143,0.5);
+    box-shadow: 0 0 0 3px var(--teal), 0 6px 18px rgba(92,192,178,0.45);
   }
   @keyframes pop {
     0% { transform: scale(1); }
@@ -157,27 +175,31 @@
     position: absolute;
     inset: 0;
     border-radius: var(--radius);
-    background: rgba(255,255,255,0.05);
-    border: 2px dashed rgba(255,255,255,0.18);
+    background: rgba(255,255,255,0.3);
+    border: 2px dashed rgba(58,149,138,0.3);
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: clamp(1.4rem, 7vmin, 2.6rem);
-    color: rgba(255,255,255,0.35);
-    transition: opacity 0.3s ease;
+    font-size: clamp(1.3rem, 6.5vmin, 2.4rem);
+    color: rgba(58,149,138,0.45);
+    transition: all 0.4s ease;
   }
   .center.unlocked {
     cursor: pointer;
-    animation: glow 1.4s ease-in-out infinite alternate;
+    animation: glow 1.5s ease-in-out infinite alternate;
   }
   .center.unlocked .lock {
-    background: linear-gradient(145deg, var(--accent), #c23b6b);
-    border: 2px solid rgba(255,255,255,0.4);
+    background: linear-gradient(145deg, var(--teal-light), var(--teal-deep));
+    border: 2px solid rgba(255,255,255,0.5);
     color: #fff;
+    font-size: clamp(0.78rem, 3.4vmin, 1.05rem);
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
   }
   @keyframes glow {
-    from { box-shadow: 0 0 0 0 rgba(255,93,143,0.0); border-radius: var(--radius); }
-    to   { box-shadow: 0 0 24px 4px rgba(255,93,143,0.6); border-radius: var(--radius); }
+    from { box-shadow: 0 0 0 0 rgba(92,192,178,0.0); border-radius: var(--radius); }
+    to   { box-shadow: 0 0 26px 5px rgba(92,192,178,0.65); border-radius: var(--radius); }
   }
   .center .reveal-img {
     position: absolute;
@@ -193,9 +215,9 @@
   .overlay {
     position: fixed;
     inset: 0;
-    background: rgba(12, 9, 20, 0.92);
-    backdrop-filter: blur(6px);
-    -webkit-backdrop-filter: blur(6px);
+    background: linear-gradient(160deg, rgba(44, 93, 87, 0.94), rgba(28, 66, 62, 0.96));
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -215,7 +237,7 @@
     width: min(78vw, 60vh);
     max-width: 420px;
     border-radius: 20px;
-    box-shadow: 0 12px 40px rgba(0,0,0,0.5);
+    box-shadow: 0 12px 40px rgba(0,0,0,0.4), 0 0 0 6px rgba(255,255,255,0.08);
     transform: scale(0.9);
     cursor: zoom-in;
     transition: transform 0.5s cubic-bezier(0.2, 0.8, 0.3, 1.2),
@@ -224,7 +246,7 @@
   .overlay.show img { transform: scale(1); }
   .overlay .hint {
     font-size: clamp(0.65rem, 2.6vw, 0.85rem);
-    opacity: 0.5;
+    color: rgba(255, 255, 255, 0.65);
   }
 
   /* Enlarged (near full-screen) view: text stays above the photo */
@@ -246,7 +268,7 @@
 
   .heart {
     font-size: clamp(2.4rem, 12vmin, 4.5rem);
-    color: var(--accent);
+    color: var(--pastel);
     animation: beat 1.1s ease-in-out infinite;
     line-height: 1;
   }
@@ -262,24 +284,27 @@
     text-align: center;
     max-width: 90%;
     line-height: 1.35;
+    color: #ffffff;
   }
   .overlay .restart {
     margin-top: 6px;
-    background: rgba(255,255,255,0.12);
-    border: 1px solid rgba(255,255,255,0.25);
+    background: rgba(255,255,255,0.16);
+    border: 1px solid rgba(255,255,255,0.35);
     color: #fff;
     font-size: 0.9rem;
-    padding: 10px 22px;
+    font-weight: 500;
+    padding: 11px 26px;
     border-radius: 999px;
     cursor: pointer;
+    transition: transform 0.15s ease, background 0.2s ease;
   }
+  .overlay .restart:hover { background: rgba(255,255,255,0.26); }
   .overlay .restart:active { transform: scale(0.96); }
 </style>
 </head>
 <body>
   <header>
-    <h1>Memory ♥</h1>
-    <p>Finde alle Paare</p>
+    <h1>A little Memory</h1>
     <div class="moves">Züge: <b id="moveCount">0</b></div>
   </header>
 
@@ -391,7 +416,13 @@
     const tile = document.createElement("div");
     tile.className = "tile center";
     tile.innerHTML = `
-      <div class="lock">🔒</div>
+      <div class="lock">
+        <svg viewBox="0 0 24 24" width="42%" height="42%" fill="none"
+             stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="4.5" y="10.5" width="15" height="10" rx="2.2"></rect>
+          <path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"></path>
+        </svg>
+      </div>
       <img class="reveal-img" src="${FINAL_IMG}" alt="">`;
     tile.addEventListener("click", onCenterClick);
     centerTile = tile;
@@ -444,7 +475,7 @@
     setTimeout(() => {
       centerTile.classList.add("unlocked");
       const lockEl = centerTile.querySelector(".lock");
-      lockEl.textContent = "♥";
+      lockEl.textContent = "Öffnen";
       sndWin();
     }, 600);
   }
