@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-<meta name="theme-color" content="#d4f0ec" />
+<meta name="theme-color" content="#4e8a5b" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <meta name="mobile-web-app-capable" content="yes" />
 <title>Memory</title>
@@ -11,16 +11,16 @@
   :root {
     --gap: clamp(6px, 1.8vmin, 14px);
     --radius: clamp(12px, 2.6vmin, 20px);
-    /* Soft teal & pastel palette */
-    --bg1: #e3f6f2;   /* pale mint */
-    --bg2: #b9e4de;   /* soft teal */
-    --ink: #2c5d57;   /* deep teal text */
-    --ink-soft: #5a8a84;
-    --teal: #5cc0b2;
-    --teal-light: #8fd6cb;
-    --teal-deep: #3a958a;
-    --card: #fbfffe;  /* card front background */
-    --pastel: #f7b7c2; /* soft pink accent for the reward heart */
+    /* Leafy forest-green, soft & pastel-like */
+    --bg1: #4e8a5b;   /* leafy forest green */
+    --bg2: #356245;   /* deep forest */
+    --ink: #f5f2e6;   /* warm cream text */
+    --ink-soft: #cfe6c8;
+    --teal: #84c184;       /* pastel leaf (card back) */
+    --teal-light: #a8d8a3; /* lighter pastel leaf */
+    --teal-deep: #3f6b48;  /* deep leaf-green */
+    --card: #f8f5ec;  /* card front background (warm cream) */
+    --pastel: #f7b7c2;
   }
 
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -129,7 +129,7 @@
   .face.back {
     background: linear-gradient(145deg, var(--teal-light), var(--teal));
     box-shadow: inset 0 0 0 2px rgba(255,255,255,0.35),
-                0 6px 14px rgba(58,149,138,0.25);
+                0 6px 14px rgba(20,40,26,0.35);
   }
   /* Clean minimal motif instead of a heart: a soft ring */
   .face.back::after {
@@ -144,7 +144,7 @@
     transform: rotateY(180deg);
     background: var(--card);
     padding: clamp(5px, 1.6vmin, 11px);
-    box-shadow: 0 6px 14px rgba(58,149,138,0.22);
+    box-shadow: 0 6px 14px rgba(20,40,26,0.30);
   }
   /* contain so portrait images (Elli/Conrad) fit fully instead of cropping */
   .face.front img {
@@ -159,7 +159,7 @@
     animation: pop 0.4s ease;
   }
   .tile.matched .face.front {
-    box-shadow: 0 0 0 3px var(--teal), 0 6px 18px rgba(92,192,178,0.45);
+    box-shadow: 0 0 0 3px var(--teal), 0 6px 18px rgba(168,216,163,0.6);
   }
   @keyframes pop {
     0% { transform: scale(1); }
@@ -176,12 +176,12 @@
     inset: 0;
     border-radius: var(--radius);
     background: rgba(255,255,255,0.3);
-    border: 2px dashed rgba(58,149,138,0.3);
+    border: 2px dashed rgba(242,239,228,0.45);
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: clamp(1.3rem, 6.5vmin, 2.4rem);
-    color: rgba(58,149,138,0.45);
+    color: rgba(242,239,228,0.6);
     transition: all 0.4s ease;
   }
   .center.unlocked {
@@ -198,8 +198,8 @@
     text-transform: uppercase;
   }
   @keyframes glow {
-    from { box-shadow: 0 0 0 0 rgba(92,192,178,0.0); border-radius: var(--radius); }
-    to   { box-shadow: 0 0 26px 5px rgba(92,192,178,0.65); border-radius: var(--radius); }
+    from { box-shadow: 0 0 0 0 rgba(168,216,163,0.0); border-radius: var(--radius); }
+    to   { box-shadow: 0 0 26px 5px rgba(168,216,163,0.75); border-radius: var(--radius); }
   }
   .center .reveal-img {
     position: absolute;
@@ -215,9 +215,7 @@
   .overlay {
     position: fixed;
     inset: 0;
-    background: linear-gradient(160deg, rgba(44, 93, 87, 0.94), rgba(28, 66, 62, 0.96));
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
+    background: linear-gradient(160deg, var(--bg1), var(--bg2));
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -244,10 +242,6 @@
                 width 0.4s ease, max-width 0.4s ease, height 0.4s ease;
   }
   .overlay.show img { transform: scale(1); }
-  .overlay .hint {
-    font-size: clamp(0.65rem, 2.6vw, 0.85rem);
-    color: rgba(255, 255, 255, 0.65);
-  }
 
   /* Enlarged (near full-screen) view: text stays above the photo */
   .overlay.enlarged {
@@ -279,12 +273,20 @@
     45% { transform: scale(1.18); }
   }
   .overlay .msg {
-    font-size: clamp(1.1rem, 5vw, 1.8rem);
-    font-weight: 600;
+    font-size: clamp(1.3rem, 6vw, 2.1rem);
+    font-weight: 700;
     text-align: center;
     max-width: 90%;
     line-height: 1.35;
+    letter-spacing: 0.5px;
     color: #ffffff;
+  }
+  .overlay .msg .mini-heart {
+    color: #e63950;
+    display: inline-block;
+    font-size: 0.9em;
+    margin-left: 0.1em;
+    animation: beat 1.1s ease-in-out infinite;
   }
   .overlay .restart {
     margin-top: 6px;
@@ -305,17 +307,15 @@
 <body>
   <header>
     <h1>A little Memory</h1>
-    <div class="moves">Züge: <b id="moveCount">0</b></div>
+    <div class="moves">Moves: <b id="moveCount">0</b></div>
   </header>
 
   <div class="board" id="board"></div>
 
   <div class="overlay" id="overlay">
-    <div class="heart">♥</div>
-    <div class="msg">für einen bisschen besseren Tag</div>
+    <div class="msg">A little Memory <span class="mini-heart">❤</span></div>
     <img id="finalImg" alt="" />
-    <div class="hint" id="hint">Tippen zum Vergrößern</div>
-    <button class="restart" id="restart">Nochmal spielen</button>
+    <button class="restart" id="restart">Play again</button>
   </div>
 
 <script>
