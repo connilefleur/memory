@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+<meta name="theme-color" content="#1e1b2e" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="mobile-web-app-capable" content="yes" />
+<title>Memory</title>
+<style>
+  :root {
+    --gap: clamp(6px, 1.8vmin, 14px);
+    --radius: clamp(10px, 2.4vmin, 18px);
+    --bg1: #2a2440;
+    --bg2: #1a1628;
+    --accent: #ff5d8f;
+    --accent2: #ffa6c1;
+  }
+
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    overflow: hidden;
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: radial-gradient(circle at 50% 0%, var(--bg1), var(--bg2));
+    color: #fff;
+    /* Fill the screen incl. mobile safe areas */
+    height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: max(env(safe-area-inset-top), 12px)
+             max(env(safe-area-inset-right), 12px)
+             max(env(safe-area-inset-bottom), 12px)
+             max(env(safe-area-inset-left), 12px);
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  header {
+    text-align: center;
+    margin-bottom: clamp(8px, 2vh, 20px);
+  }
+  header h1 {
+    margin: 0;
+    font-size: clamp(1.3rem, 5vw, 2rem);
+    font-weight: 700;
+    letter-spacing: 0.5px;
+  }
+  header p {
+    margin: 4px 0 0;
+    font-size: clamp(0.75rem, 3vw, 1rem);
+    opacity: 0.7;
+  }
+  header .moves {
+    margin-top: 6px;
+    font-size: clamp(0.7rem, 2.6vw, 0.9rem);
+    opacity: 0.55;
+    letter-spacing: 0.5px;
+  }
+  header .moves b { opacity: 0.9; }
+
+  /* The board is a square that fits within the smaller screen dimension */
+  .board {
+    width: min(94vw, 94vh, 560px);
+    aspect-ratio: 1 / 1;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+    gap: var(--gap);
+  }
+
+  .tile {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    border-radius: var(--radius);
+    cursor: pointer;
+    perspective: 800px;
+    background: transparent;
+    border: none;
+    padding: 0;
+  }
+
+  .tile .inner {
+    position: absolute;
+    inset: 0;
+    transform-style: preserve-3d;
+    transition: transform 0.45s cubic-bezier(0.4, 0.2, 0.2, 1);
+    border-radius: var(--radius);
+  }
+  .tile.flipped .inner,
+  .tile.matched .inner {
+    transform: rotateY(180deg);
+  }
+
+  .face {
+    position: absolute;
+    inset: 0;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    border-radius: var(--radius);
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .face.back {
+    background: linear-gradient(145deg, var(--accent), #c23b6b);
+    box-shadow: inset 0 0 0 2px rgba(255,255,255,0.18),
+                0 4px 12px rgba(0,0,0,0.35);
+  }
+  .face.back::after {
+    content: "♥";
+    font-size: clamp(1.6rem, 8vmin, 3.2rem);
+    color: rgba(255,255,255,0.85);
+    text-shadow: 0 2px 6px rgba(0,0,0,0.3);
+  }
+
+  .face.front {
+    transform: rotateY(180deg);
+    background: #fff;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.35);
+  }
+  .face.front img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .tile.matched {
+    animation: pop 0.4s ease;
+  }
+  .tile.matched .face.front {
+    box-shadow: 0 0 0 3px var(--accent2), 0 4px 16px rgba(255,93,143,0.5);
+  }
+  @keyframes pop {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.06); }
+    100% { transform: scale(1); }
+  }
+
+  /* Center special tile */
+  .center {
+    cursor: default;
+  }
+  .center .lock {
+    position: absolute;
+    inset: 0;
+    border-radius: var(--radius);
+    background: rgba(255,255,255,0.05);
+    border: 2px dashed rgba(255,255,255,0.18);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: clamp(1.4rem, 7vmin, 2.6rem);
+    color: rgba(255,255,255,0.35);
+    transition: opacity 0.3s ease;
+  }
+  .center.unlocked {
+    cursor: pointer;
+    animation: glow 1.4s ease-in-out infinite alternate;
+  }
+  .center.unlocked .lock {
+    background: linear-gradient(145deg, var(--accent), #c23b6b);
+    border: 2px solid rgba(255,255,255,0.4);
+    color: #fff;
+  }
+  @keyframes glow {
+    from { box-shadow: 0 0 0 0 rgba(255,93,143,0.0); border-radius: var(--radius); }
+    to   { box-shadow: 0 0 24px 4px rgba(255,93,143,0.6); border-radius: var(--radius); }
+  }
+  .center .reveal-img {
+    position: absolute;
+    inset: 0;
+    border-radius: var(--radius);
+    object-fit: cover;
+    width: 100%;
+    height: 100%;
+    display: none;
+  }
+
+  /* Final overlay */
+  .overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(12, 9, 20, 0.92);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: clamp(12px, 3vh, 24px);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.5s ease;
+    padding: max(env(safe-area-inset-top), 16px) 16px max(env(safe-area-inset-bottom), 16px);
+    z-index: 10;
+  }
+  .overlay.show {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .overlay img {
+    width: min(78vw, 60vh);
+    max-width: 420px;
+    border-radius: 20px;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.5);
+    transform: scale(0.9);
+    cursor: zoom-in;
+    transition: transform 0.5s cubic-bezier(0.2, 0.8, 0.3, 1.2),
+                width 0.4s ease, max-width 0.4s ease, height 0.4s ease;
+  }
+  .overlay.show img { transform: scale(1); }
+  .overlay .hint {
+    font-size: clamp(0.65rem, 2.6vw, 0.85rem);
+    opacity: 0.5;
+  }
+
+  /* Enlarged (near full-screen) view: text stays above the photo */
+  .overlay.enlarged {
+    justify-content: flex-start;
+    gap: clamp(8px, 2vh, 16px);
+    padding-top: max(env(safe-area-inset-top), 16px);
+  }
+  .overlay.enlarged .heart { display: none; }
+  .overlay.enlarged .restart { display: none; }
+  .overlay.enlarged img {
+    cursor: zoom-out;
+    width: auto;
+    max-width: 96vw;
+    height: min(82vh, 96vw);
+    max-height: 84vh;
+    border-radius: 14px;
+  }
+
+  .heart {
+    font-size: clamp(2.4rem, 12vmin, 4.5rem);
+    color: var(--accent);
+    animation: beat 1.1s ease-in-out infinite;
+    line-height: 1;
+  }
+  @keyframes beat {
+    0%, 100% { transform: scale(1); }
+    15% { transform: scale(1.25); }
+    30% { transform: scale(1.05); }
+    45% { transform: scale(1.18); }
+  }
+  .overlay .msg {
+    font-size: clamp(1.1rem, 5vw, 1.8rem);
+    font-weight: 600;
+    text-align: center;
+    max-width: 90%;
+    line-height: 1.35;
+  }
+  .overlay .restart {
+    margin-top: 6px;
+    background: rgba(255,255,255,0.12);
+    border: 1px solid rgba(255,255,255,0.25);
+    color: #fff;
+    font-size: 0.9rem;
+    padding: 10px 22px;
+    border-radius: 999px;
+    cursor: pointer;
+  }
+  .overlay .restart:active { transform: scale(0.96); }
+</style>
+</head>
+<body>
+  <header>
+    <h1>Memory ♥</h1>
+    <p>Finde alle Paare</p>
+    <div class="moves">Züge: <b id="moveCount">0</b></div>
+  </header>
+
+  <div class="board" id="board"></div>
+
+  <div class="overlay" id="overlay">
+    <div class="heart">♥</div>
+    <div class="msg">für einen bisschen besseren Tag</div>
+    <img id="finalImg" alt="" />
+    <div class="hint" id="hint">Tippen zum Vergrößern</div>
+    <button class="restart" id="restart">Nochmal spielen</button>
+  </div>
+
+<script>
+  // Each pair shares a "group" id. The two images in a pair differ.
+  const PAIRS = [
+    { group: "cat",     img: "images/CAT1.png" },
+    { group: "cat",     img: "images/CAT2.png" },
+    { group: "lama",    img: "images/LAMA1.png" },
+    { group: "lama",    img: "images/LAMA2.png" },
+    { group: "pig",     img: "images/PIG1.png" },
+    { group: "pig",     img: "images/PIG2.png" },
+    { group: "friends", img: "images/Conrad.png" },
+    { group: "friends", img: "images/ELLI.png" },
+  ];
+  const FINAL_IMG = "images/whatsapp.jpeg";
+  const CENTER_INDEX = 4; // middle cell of the 3x3 grid
+
+  const board = document.getElementById("board");
+  const overlay = document.getElementById("overlay");
+  const finalImg = document.getElementById("finalImg");
+  const moveCountEl = document.getElementById("moveCount");
+  finalImg.src = FINAL_IMG;
+
+  let firstTile = null;
+  let lock = false;        // input lock during flip-back animation
+  let matchedCount = 0;
+  let centerTile = null;
+  let solved = false;
+  let moves = 0;
+
+  /* ---- Sound (WebAudio, no asset files) + haptics ---- */
+  let audioCtx = null;
+  function beep(freq, dur = 0.12, type = "sine", vol = 0.15) {
+    try {
+      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = type;
+      osc.frequency.value = freq;
+      gain.gain.setValueAtTime(vol, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + dur);
+      osc.connect(gain).connect(audioCtx.destination);
+      osc.start();
+      osc.stop(audioCtx.currentTime + dur);
+    } catch (e) { /* audio not available */ }
+  }
+  function vibrate(pattern) {
+    if (navigator.vibrate) { try { navigator.vibrate(pattern); } catch (e) {} }
+  }
+  const sndFlip  = () => beep(420, 0.07, "triangle", 0.12);
+  const sndMatch = () => { beep(660, 0.1, "sine", 0.18); setTimeout(() => beep(880, 0.14, "sine", 0.18), 90); vibrate(40); };
+  const sndNope  = () => { beep(200, 0.16, "sawtooth", 0.12); vibrate([30, 40, 30]); };
+  const sndWin   = () => { [523, 659, 784, 1047].forEach((f, i) => setTimeout(() => beep(f, 0.18, "sine", 0.2), i * 130)); vibrate([60, 50, 60, 50, 120]); };
+
+  function shuffle(arr) {
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+  }
+
+  function buildBoard() {
+    board.innerHTML = "";
+    firstTile = null;
+    lock = false;
+    matchedCount = 0;
+    solved = false;
+    moves = 0;
+    moveCountEl.textContent = "0";
+
+    const deck = shuffle([...PAIRS]);
+    let deckIdx = 0;
+
+    for (let cell = 0; cell < 9; cell++) {
+      if (cell === CENTER_INDEX) {
+        board.appendChild(buildCenter());
+      } else {
+        board.appendChild(buildCard(deck[deckIdx++]));
+      }
+    }
+  }
+
+  function buildCard(data) {
+    const tile = document.createElement("button");
+    tile.className = "tile";
+    tile.dataset.group = data.group;
+    tile.innerHTML = `
+      <div class="inner">
+        <div class="face back"></div>
+        <div class="face front"><img src="${data.img}" alt=""></div>
+      </div>`;
+    tile.addEventListener("click", () => onCardClick(tile));
+    return tile;
+  }
+
+  function buildCenter() {
+    const tile = document.createElement("div");
+    tile.className = "tile center";
+    tile.innerHTML = `
+      <div class="lock">🔒</div>
+      <img class="reveal-img" src="${FINAL_IMG}" alt="">`;
+    tile.addEventListener("click", onCenterClick);
+    centerTile = tile;
+    return tile;
+  }
+
+  function onCardClick(tile) {
+    if (lock) return;
+    if (tile.classList.contains("flipped") || tile.classList.contains("matched")) return;
+
+    tile.classList.add("flipped");
+    sndFlip();
+
+    if (!firstTile) {
+      firstTile = tile;
+      return;
+    }
+
+    // Second tile flipped — counts as one move (a pair attempt)
+    moves++;
+    moveCountEl.textContent = String(moves);
+
+    if (tile.dataset.group === firstTile.dataset.group) {
+      // Match!
+      const a = firstTile, b = tile;
+      firstTile = null;
+      setTimeout(() => {
+        a.classList.add("matched");
+        b.classList.add("matched");
+        sndMatch();
+      }, 300);
+      matchedCount += 2;
+      if (matchedCount === 8) unlockCenter();
+    } else {
+      // No match — flip both back
+      lock = true;
+      const a = firstTile, b = tile;
+      firstTile = null;
+      sndNope();
+      setTimeout(() => {
+        a.classList.remove("flipped");
+        b.classList.remove("flipped");
+        lock = false;
+      }, 850);
+    }
+  }
+
+  function unlockCenter() {
+    solved = true;
+    setTimeout(() => {
+      centerTile.classList.add("unlocked");
+      const lockEl = centerTile.querySelector(".lock");
+      lockEl.textContent = "♥";
+      sndWin();
+    }, 600);
+  }
+
+  function onCenterClick() {
+    if (!solved) return; // greyed out / inactive until all pairs solved
+    overlay.classList.add("show");
+  }
+
+  // Tap the final photo to enlarge it near full-screen (text stays above)
+  finalImg.addEventListener("click", () => {
+    overlay.classList.toggle("enlarged");
+  });
+
+  document.getElementById("restart").addEventListener("click", () => {
+    overlay.classList.remove("show", "enlarged");
+    setTimeout(buildBoard, 300);
+  });
+
+  buildBoard();
+</script>
+</body>
+</html>
